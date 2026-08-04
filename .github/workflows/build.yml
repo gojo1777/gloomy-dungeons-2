@@ -21,9 +21,10 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      # 3. Accept licenses and install required SDK components
+      # 3. Add Android SDK tools to PATH and install required components
       - name: Install Android SDK components
         run: |
+          export PATH="$ANDROID_HOME/cmdline-tools/latest/bin:$PATH"
           yes | sdkmanager --licenses || true
           sdkmanager \
             "platforms;android-22" \
@@ -34,11 +35,10 @@ jobs:
       # 4. Install old NDK r14b (project uses deprecated NDK style)
       - name: Install NDK r14b
         run: |
-          mkdir -p $ANDROID_HOME/ndk
-          cd /tmp
-          wget -q https://dl.google.com/android/repository/android-ndk-r14b-linux-x86_64.zip
-          unzip -q android-ndk-r14b-linux-x86_64.zip
-          mv android-ndk-r14b $ANDROID_HOME/ndk/14.1.3816874
+          mkdir -p "$ANDROID_HOME/ndk"
+          wget -q https://dl.google.com/android/repository/android-ndk-r14b-linux-x86_64.zip -O /tmp/ndk.zip
+          unzip -q /tmp/ndk.zip -d /tmp/
+          mv /tmp/android-ndk-r14b "$ANDROID_HOME/ndk/14.1.3816874"
           echo "ANDROID_NDK_HOME=$ANDROID_HOME/ndk/14.1.3816874" >> $GITHUB_ENV
 
       # 5. Switch to Java 8 — old Gradle 2.14.1 requires Java 8
@@ -65,7 +65,7 @@ jobs:
       - name: Find APK
         run: find build/outputs/apk -name "*.apk" -type f
 
-      # 9. Upload APK as downloadable artifact
+      # 9. Upload APK
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
