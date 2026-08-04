@@ -10,32 +10,24 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Repo checkout
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 2. Java 8 — Gradle 4.4 + AGP 2.3.3 requires Java 8
-      - name: Set up JDK 8
+      - name: Set up JDK 17 (for sdkmanager)
         uses: actions/setup-java@v4
         with:
-          java-version: '8'
+          java-version: '17'
           distribution: 'temurin'
 
-      # 3. Set up Android SDK (Java 17 needed for sdkmanager)
       - name: Install Android SDK components
         run: |
-          export JAVA_HOME=$(dirname $(dirname $(readlink -f $(which java))))
-          # Use Java 17 just for sdkmanager
-          sudo apt-get install -y openjdk-17-jdk-headless 2>/dev/null || true
-          export SDKMANAGER_JAVA_HOME=$(dirname $(dirname $(readlink -f $(which java17 2>/dev/null || echo /usr/lib/jvm/java-17-openjdk-amd64/bin/java))))
-          JAVA_HOME=$SDKMANAGER_JAVA_HOME $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses < /dev/null || true
-          JAVA_HOME=$SDKMANAGER_JAVA_HOME $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager \
+          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
+          $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager \
             "platforms;android-22" \
             "build-tools;25.0.2" \
             "extras;android;m2repository" \
             "extras;google;m2repository"
 
-      # 4. Install old NDK r14b (project uses deprecated NDK style)
       - name: Install NDK r14b
         run: |
           mkdir -p "$ANDROID_HOME/ndk"
@@ -44,50 +36,43 @@ jobs:
           mv /tmp/android-ndk-r14b "$ANDROID_HOME/ndk/14.1.3816874"
           echo "ANDROID_NDK_HOME=$ANDROID_HOME/ndk/14.1.3816874" >> $GITHUB_ENV
 
-      # 5. Patch build files — jcenter is dead since 2021, switch to google() + mavenCentral()
-      #    and use AGP 2.3.3 which is available on google() repository
-      - name: Patch build files for modern repositories
+      - name: Set up JDK 8 (for Gradle build)
+        uses: actions/setup-java@v4
+        with:
+          java-version: '8'
+          distribution: 'temurin'
+
+      - name: Apply patched build files
         run: |
-          # Update Gradle wrapper to 4.4 (compatible with AGP 2.3.3)
+          # Replace root build.gradle with patched version (google() + AGP 2.3.3)
+          cp .github/patched-build.gradle build.gradle
+
+          # Update Gradle wrapper to 4.4
           sed -i 's|distributionUrl=.*|distributionUrl=https\\://services.gradle.org/distributions/gradle-4.4-all.zip|' \
             gradle/wrapper/gradle-wrapper.properties
 
-          # Patch root build.gradle
-          # 1. Add google() before mavenCentral() in buildscript
-          sed -i 's/repositories {/repositories {\n        google()/' build.gradle
-          # 2. Replace jcenter() with mavenCentral()
-          sed -i 's/jcenter()/mavenCentral()/g' build.gradle
-          # 3. Update AGP to 2.3.3 (available on google())
-          sed -i "s/com.android.tools.build:gradle:2.2.3/com.android.tools.build:gradle:2.3.3/" build.gradle
-
-          # Patch library build.gradle files (same jcenter issue)
+          # Fix jcenter in library build.gradle files
           for f in libraries/*/build.gradle; do
-            sed -i 's/jcenter()/mavenCentral()/g' "$f" 2>/dev/null || true
-            sed -i '/repositories {/a\        google()' "$f" 2>/dev/null || true
+            if [ -f "$f" ]; then
+              sed -i 's/jcenter()/mavenCentral()/g' "$f"
+              grep -q 'google()' "$f" || sed -i '/mavenCentral()/i\\        google()' "$f"
+            fi
           done
 
-          echo "=== Patched build.gradle ===" && cat build.gradle
-          echo "=== Patched gradle-wrapper.properties ===" && cat gradle/wrapper/gradle-wrapper.properties
-
-      # 6. Make gradlew executable
       - name: Make gradlew executable
         run: chmod +x ./gradlew
 
-      # 7. Build F-Droid debug APK
       - name: Build Debug APK
         run: |
           ./gradlew assembleForfdroidWoutgplayWoutzeemoteWoutkoWouthalloweenDebug \
             --no-daemon \
-            --stacktrace \
-            --info 2>&1 | tail -100
+            --stacktrace 2>&1
         env:
           ANDROID_NDK_HOME: ${{ env.ANDROID_NDK_HOME }}
 
-      # 8. Find the built APK
       - name: Find APK
         run: find build/outputs/apk -name "*.apk" -type f
 
-      # 9. Upload APK
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
