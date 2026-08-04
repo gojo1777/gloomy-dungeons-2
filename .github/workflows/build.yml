@@ -7,7 +7,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest   # FIXED: ubuntu-20.04 deprecated, use latest
 
     steps:
       # 1. Repo checkout
