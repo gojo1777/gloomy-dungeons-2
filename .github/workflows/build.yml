@@ -14,19 +14,22 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 2. Java 17 first — sdkmanager requires Java 17+
-      - name: Set up JDK 17 (for sdkmanager)
+      # 2. Java 8 — Gradle 4.4 + AGP 2.3.3 requires Java 8
+      - name: Set up JDK 8
         uses: actions/setup-java@v4
         with:
-          java-version: '17'
+          java-version: '8'
           distribution: 'temurin'
 
-      # 3. Add Android SDK tools to PATH and install required components
+      # 3. Set up Android SDK (Java 17 needed for sdkmanager)
       - name: Install Android SDK components
         run: |
-          export PATH="$ANDROID_HOME/cmdline-tools/latest/bin:$PATH"
-          yes | sdkmanager --licenses || true
-          sdkmanager \
+          export JAVA_HOME=$(dirname $(dirname $(readlink -f $(which java))))
+          # Use Java 17 just for sdkmanager
+          sudo apt-get install -y openjdk-17-jdk-headless 2>/dev/null || true
+          export SDKMANAGER_JAVA_HOME=$(dirname $(dirname $(readlink -f $(which java17 2>/dev/null || echo /usr/lib/jvm/java-17-openjdk-amd64/bin/java))))
+          JAVA_HOME=$SDKMANAGER_JAVA_HOME $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses < /dev/null || true
+          JAVA_HOME=$SDKMANAGER_JAVA_HOME $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager \
             "platforms;android-22" \
             "build-tools;25.0.2" \
             "extras;android;m2repository" \
@@ -41,23 +44,42 @@ jobs:
           mv /tmp/android-ndk-r14b "$ANDROID_HOME/ndk/14.1.3816874"
           echo "ANDROID_NDK_HOME=$ANDROID_HOME/ndk/14.1.3816874" >> $GITHUB_ENV
 
-      # 5. Switch to Java 8 — old Gradle 2.14.1 requires Java 8
-      - name: Set up JDK 8 (for Gradle build)
-        uses: actions/setup-java@v4
-        with:
-          java-version: '8'
-          distribution: 'temurin'
+      # 5. Patch build files — jcenter is dead since 2021, switch to google() + mavenCentral()
+      #    and use AGP 2.3.3 which is available on google() repository
+      - name: Patch build files for modern repositories
+        run: |
+          # Update Gradle wrapper to 4.4 (compatible with AGP 2.3.3)
+          sed -i 's|distributionUrl=.*|distributionUrl=https\\://services.gradle.org/distributions/gradle-4.4-all.zip|' \
+            gradle/wrapper/gradle-wrapper.properties
+
+          # Patch root build.gradle
+          # 1. Add google() before mavenCentral() in buildscript
+          sed -i 's/repositories {/repositories {\n        google()/' build.gradle
+          # 2. Replace jcenter() with mavenCentral()
+          sed -i 's/jcenter()/mavenCentral()/g' build.gradle
+          # 3. Update AGP to 2.3.3 (available on google())
+          sed -i "s/com.android.tools.build:gradle:2.2.3/com.android.tools.build:gradle:2.3.3/" build.gradle
+
+          # Patch library build.gradle files (same jcenter issue)
+          for f in libraries/*/build.gradle; do
+            sed -i 's/jcenter()/mavenCentral()/g' "$f" 2>/dev/null || true
+            sed -i '/repositories {/a\        google()' "$f" 2>/dev/null || true
+          done
+
+          echo "=== Patched build.gradle ===" && cat build.gradle
+          echo "=== Patched gradle-wrapper.properties ===" && cat gradle/wrapper/gradle-wrapper.properties
 
       # 6. Make gradlew executable
       - name: Make gradlew executable
         run: chmod +x ./gradlew
 
-      # 7. Build F-Droid debug APK (no signing required)
+      # 7. Build F-Droid debug APK
       - name: Build Debug APK
         run: |
           ./gradlew assembleForfdroidWoutgplayWoutzeemoteWoutkoWouthalloweenDebug \
             --no-daemon \
-            --stacktrace
+            --stacktrace \
+            --info 2>&1 | tail -100
         env:
           ANDROID_NDK_HOME: ${{ env.ANDROID_NDK_HOME }}
 
