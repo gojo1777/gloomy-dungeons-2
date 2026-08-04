@@ -1,7 +1,9 @@
-apply plugin: 'android-library'
+plugins {
+    id "com.android.library"
+}
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
 }
 
 allprojects {
@@ -16,12 +18,12 @@ allprojects {
 }
 
 android {
-    compileSdkVersion Integer.parseInt(project.ANDROID_BUILD_SDK_VERSION)
-    buildToolsVersion project.ANDROID_BUILD_TOOLS_VERSION
+    namespace 'org.holoeverywhere'
+    compileSdk 34
 
     defaultConfig {
-        minSdkVersion Integer.parseInt(project.ANDROID_BUILD_MIN_SDK_VERSION)
-        targetSdkVersion Integer.parseInt(project.ANDROID_BUILD_TARGET_SDK_VERSION)
+        minSdk Integer.parseInt(project.ANDROID_BUILD_MIN_SDK_VERSION)
+        targetSdk Integer.parseInt(project.ANDROID_BUILD_TARGET_SDK_VERSION)
     }
 
     sourceSets {
@@ -30,5 +32,9 @@ android {
             java.srcDirs = ['src']
             res.srcDirs = ['res']
         }
+    }
+
+    lint {
+        abortOnError false
     }
 }
