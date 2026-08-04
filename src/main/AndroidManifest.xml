@@ -2,7 +2,6 @@
 <manifest
 	xmlns:android="http://schemas.android.com/apk/res/android"
 	xmlns:tools="http://schemas.android.com/tools"
-	package="zame.game"
 	android:installLocation="auto"
 >
 	<!-- xlargeScreens - For Android versions 3.2 or higher, there is a Zooming-In button which expands apps made for smart phones into a size fit for tablets. However, because this function obstructs proper running of ads, it should not be used. -->
