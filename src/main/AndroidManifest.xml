@@ -2,6 +2,7 @@
 <manifest
 	xmlns:android="http://schemas.android.com/apk/res/android"
 	xmlns:tools="http://schemas.android.com/tools"
+	package="zame.game"
 	android:installLocation="auto"
 >
 	<!-- xlargeScreens - For Android versions 3.2 or higher, there is a Zooming-In button which expands apps made for smart phones into a size fit for tablets. However, because this function obstructs proper running of ads, it should not be used. -->
@@ -33,6 +34,7 @@
 			android:alwaysRetainTaskState="true"
 			android:theme="@style/Gloomy.Theme.MainActivity"
 			android:configChanges="orientation|keyboard|keyboardHidden|screenSize"
+			android:exported="true"
 		>
 			<intent-filter>
 				<action android:name="android.intent.action.MAIN" />
@@ -60,6 +62,7 @@
 		<service
 			android:name="zame.game.MyWallpaperService"
 			android:enabled="true"
+			android:exported="true"
 			android:permission="android.permission.BIND_WALLPAPER"
 			android:label="@string/app_name"
 		>
@@ -69,7 +72,7 @@
 			<meta-data android:name="android.service.wallpaper" android:resource="@xml/wallpaper" />
 		</service>
 
-		<receiver android:name="zame.game.MyWidgetProvider">
+		<receiver android:name="zame.game.MyWidgetProvider" android:exported="true">
 			<intent-filter>
 				<action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
 			</intent-filter>
