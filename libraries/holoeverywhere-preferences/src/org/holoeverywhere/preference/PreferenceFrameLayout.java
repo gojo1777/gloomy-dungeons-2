@@ -1,4 +1,3 @@
-
 package org.holoeverywhere.preference;
 
 import android.content.Context;
@@ -18,7 +17,7 @@ public class PreferenceFrameLayout extends FrameLayout {
                     R.styleable.PreferenceFrameLayout_Layout);
             removeBorders = a
                     .getBoolean(
-                            R.styleable.PreferenceFrameLayout_Layout_android_layout_removeBorders,
+                            R.styleable.PreferenceFrameLayout_Layout_layout_removeBorders,
                             false);
             a.recycle();
         }
