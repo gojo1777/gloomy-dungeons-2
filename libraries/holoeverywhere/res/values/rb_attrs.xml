@@ -201,13 +201,6 @@
     <attr name="fastScrollThumbDrawable" />
     <attr name="fastScrollTrackDrawable" />
   </declare-styleable>
-  <declare-styleable name="IconMenuView">
-    <attr name="android:maxItems" />
-    <attr name="android:maxItemsPerRow" />
-    <attr name="android:maxRows" />
-    <attr name="android:moreIcon" />
-    <attr name="android:rowHeight" />
-  </declare-styleable>
   <declare-styleable name="LayerDrawable">
     <attr name="android:opacity" />
   </declare-styleable>
