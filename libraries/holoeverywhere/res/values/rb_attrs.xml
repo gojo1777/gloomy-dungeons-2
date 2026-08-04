@@ -229,7 +229,7 @@
     <attr name="android:itemBackground" />
     <attr name="android:itemIconDisabledAlpha" />
     <attr name="android:itemTextAppearance" />
-    <attr name="android:preserveIconSpacing" />
+    <attr name="preserveIconSpacing" format="boolean" />
     <attr name="android:verticalDivider" />
     <attr name="android:windowAnimationStyle" />
   </declare-styleable>
