@@ -85,7 +85,7 @@
     <attr name="android:paddingTop" />
   </declare-styleable>
   <declare-styleable name="PreferenceFrameLayout_Layout">
-    <attr name="android:layout_removeBorders" />
+    <attr name="layout_removeBorders" format="boolean" />
   </declare-styleable>
   <declare-styleable name="PreferenceGroup">
     <attr name="android:orderingFromXml" />
