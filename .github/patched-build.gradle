@@ -1,0 +1,108 @@
+// org.zamedev.gloomydungeons2.fullnfree
+// Patched: replaced jcenter() with google() + mavenCentral(), AGP 2.2.3 -> 2.3.3
+
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath 'com.android.tools.build:gradle:2.3.3'
+    }
+}
+
+apply plugin: 'com.android.application'
+
+allprojects {
+    tasks.withType(JavaCompile) {
+        options.compilerArgs << '-Xlint:all'
+        options.compilerArgs << '-Xlint:-deprecation'
+        options.compilerArgs << '-Xlint:-unchecked'
+    }
+}
+
+android {
+    compileSdkVersion 22
+    buildToolsVersion '25.0.2'
+
+    defaultConfig {
+        minSdkVersion Integer.parseInt(project.ANDROID_BUILD_MIN_SDK_VERSION)
+        targetSdkVersion Integer.parseInt(project.ANDROID_BUILD_TARGET_SDK_VERSION)
+
+        versionName project.VERSION_NAME
+        versionCode Integer.parseInt(project.VERSION_CODE)
+
+        ndk {
+            moduleName 'librenderer'
+            cFlags '-Werror'
+            ldLibs 'log', 'GLESv1_CM'
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-project.txt'
+        }
+    }
+
+    flavorDimensions 'package', 'gplay', 'zeemote', 'langko', 'gfxhalloween'
+
+    productFlavors {
+        forgplay {
+            dimension 'package'
+            applicationId 'org.zamedev.gloomydungeons2.fullnfree'
+        }
+
+        forgplayhalloween {
+            dimension 'package'
+            applicationId 'org.zamedev.gloomydungeons2.halloween'
+        }
+
+        forfdroid {
+            dimension 'package'
+            applicationId 'org.zamedev.gloomydungeons2.opensource'
+        }
+
+        withgplay {
+            dimension 'gplay'
+        }
+
+        woutgplay {
+            dimension 'gplay'
+        }
+
+        withzeemote {
+            dimension 'zeemote'
+        }
+
+        woutzeemote {
+            dimension 'zeemote'
+        }
+
+        withko {
+            dimension 'langko'
+        }
+
+        woutko {
+            dimension 'langko'
+        }
+
+        withhalloween {
+            dimension 'gfxhalloween'
+        }
+
+        wouthalloween {
+            dimension 'gfxhalloween'
+        }
+    }
+}
+
+dependencies {
+    compile project(':libraries:holoeverywhere')
+    compile project(':libraries:holoeverywhere-preferences')
+    compile fileTree(include: ['*.jar'], dir: 'src/main/libs')
+    withgplayCompile fileTree(dir: 'src/withgplay/libs', include: ['*.jar'])
+    withzeemoteCompile fileTree(dir: 'src/withzeemote/libs', include: ['*.jar'])
+}
