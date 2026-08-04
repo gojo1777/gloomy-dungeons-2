@@ -42,12 +42,12 @@ jobs:
           java-version: '8'
           distribution: 'temurin'
 
-      - name: Apply patched build files
+      - name: Patch build files
         run: |
-          # Replace root build.gradle with patched version (google() + AGP 2.3.3)
-          cp .github/patched-build.gradle build.gradle
+          # Write patched build.gradle using base64 (avoids YAML/heredoc issues)
+          echo "Ly8gb3JnLnphbWVkZXYuZ2xvb215ZHVuZ2VvbnMyLmZ1bGxuZnJlZQovLyBQYXRjaGVkOiByZXBsYWNlZCBqY2VudGVyKCkgd2l0aCBnb29nbGUoKSArIG1hdmVuQ2VudHJhbCgpLCBBR1AgMi4yLjMgLT4gMi4zLjMKCmJ1aWxkc2NyaXB0IHsKICAgIHJlcG9zaXRvcmllcyB7CiAgICAgICAgZ29vZ2xlKCkKICAgICAgICBtYXZlbkNlbnRyYWwoKQogICAgfQoKICAgIGRlcGVuZGVuY2llcyB7CiAgICAgICAgY2xhc3NwYXRoICdjb20uYW5kcm9pZC50b29scy5idWlsZDpncmFkbGU6Mi4zLjMnCiAgICB9Cn0KCmFwcGx5IHBsdWdpbjogJ2NvbS5hbmRyb2lkLmFwcGxpY2F0aW9uJwoKYWxscHJvamVjdHMgewogICAgdGFza3Mud2l0aFR5cGUoSmF2YUNvbXBpbGUpIHsKICAgICAgICBvcHRpb25zLmNvbXBpbGVyQXJncyA8PCAnLVhsaW50OmFsbCcKICAgICAgICBvcHRpb25zLmNvbXBpbGVyQXJncyA8PCAnLVhsaW50Oi1kZXByZWNhdGlvbicKICAgICAgICBvcHRpb25zLmNvbXBpbGVyQXJncyA8PCAnLVhsaW50Oi11bmNoZWNrZWQnCiAgICB9Cn0KCmFuZHJvaWQgewogICAgY29tcGlsZVNka1ZlcnNpb24gMjIKICAgIGJ1aWxkVG9vbHNWZXJzaW9uICcyNS4wLjInCgogICAgZGVmYXVsdENvbmZpZyB7CiAgICAgICAgbWluU2RrVmVyc2lvbiBJbnRlZ2VyLnBhcnNlSW50KHByb2plY3QuQU5EUk9JRF9CVUlMRF9NSU5fU0RLX1ZFUlNJT04pCiAgICAgICAgdGFyZ2V0U2RrVmVyc2lvbiBJbnRlZ2VyLnBhcnNlSW50KHByb2plY3QuQU5EUk9JRF9CVUlMRF9UQVJHRVRfU0RLX1ZFUlNJT04pCgogICAgICAgIHZlcnNpb25OYW1lIHByb2plY3QuVkVSU0lPTl9OQU1FCiAgICAgICAgdmVyc2lvbkNvZGUgSW50ZWdlci5wYXJzZUludChwcm9qZWN0LlZFUlNJT05fQ09ERSkKCiAgICAgICAgbmRrIHsKICAgICAgICAgICAgbW9kdWxlTmFtZSAnbGlicmVuZGVyZXInCiAgICAgICAgICAgIGNGbGFncyAnLVdlcnJvcicKICAgICAgICAgICAgbGRMaWJzICdsb2cnLCAnR0xFU3YxX0NNJwogICAgICAgIH0KICAgIH0KCiAgICBidWlsZFR5cGVzIHsKICAgICAgICByZWxlYXNlIHsKICAgICAgICAgICAgbWluaWZ5RW5hYmxlZCB0cnVlCiAgICAgICAgICAgIHByb2d1YXJkRmlsZXMgZ2V0RGVmYXVsdFByb2d1YXJkRmlsZSgncHJvZ3VhcmQtYW5kcm9pZC50eHQnKSwgJ3Byb2d1YXJkLXByb2plY3QudHh0JwogICAgICAgIH0KICAgIH0KCiAgICBmbGF2b3JEaW1lbnNpb25zICdwYWNrYWdlJywgJ2dwbGF5JywgJ3plZW1vdGUnLCAnbGFuZ2tvJywgJ2dmeGhhbGxvd2VlbicKCiAgICBwcm9kdWN0Rmxhdm9ycyB7CiAgICAgICAgZm9yZ3BsYXkgewogICAgICAgICAgICBkaW1lbnNpb24gJ3BhY2thZ2UnCiAgICAgICAgICAgIGFwcGxpY2F0aW9uSWQgJ29yZy56YW1lZGV2Lmdsb29teWR1bmdlb25zMi5mdWxsbmZyZWUnCiAgICAgICAgfQoKICAgICAgICBmb3JncGxheWhhbGxvd2VlbiB7CiAgICAgICAgICAgIGRpbWVuc2lvbiAncGFja2FnZScKICAgICAgICAgICAgYXBwbGljYXRpb25JZCAnb3JnLnphbWVkZXYuZ2xvb215ZHVuZ2VvbnMyLmhhbGxvd2VlbicKICAgICAgICB9CgogICAgICAgIGZvcmZkcm9pZCB7CiAgICAgICAgICAgIGRpbWVuc2lvbiAncGFja2FnZScKICAgICAgICAgICAgYXBwbGljYXRpb25JZCAnb3JnLnphbWVkZXYuZ2xvb215ZHVuZ2VvbnMyLm9wZW5zb3VyY2UnCiAgICAgICAgfQoKICAgICAgICB3aXRoZ3BsYXkgewogICAgICAgICAgICBkaW1lbnNpb24gJ2dwbGF5JwogICAgICAgIH0KCiAgICAgICAgd291dGdwbGF5IHsKICAgICAgICAgICAgZGltZW5zaW9uICdncGxheScKICAgICAgICB9CgogICAgICAgIHdpdGh6ZWVtb3RlIHsKICAgICAgICAgICAgZGltZW5zaW9uICd6ZWVtb3RlJwogICAgICAgIH0KCiAgICAgICAgd291dHplZW1vdGUgewogICAgICAgICAgICBkaW1lbnNpb24gJ3plZW1vdGUnCiAgICAgICAgfQoKICAgICAgICB3aXRoa28gewogICAgICAgICAgICBkaW1lbnNpb24gJ2xhbmdrbycKICAgICAgICB9CgogICAgICAgIHdvdXRrbyB7CiAgICAgICAgICAgIGRpbWVuc2lvbiAnbGFuZ2tvJwogICAgICAgIH0KCiAgICAgICAgd2l0aGhhbGxvd2VlbiB7CiAgICAgICAgICAgIGRpbWVuc2lvbiAnZ2Z4aGFsbG93ZWVuJwogICAgICAgIH0KCiAgICAgICAgd291dGhhbGxvd2VlbiB7CiAgICAgICAgICAgIGRpbWVuc2lvbiAnZ2Z4aGFsbG93ZWVuJwogICAgICAgIH0KICAgIH0KfQoKZGVwZW5kZW5jaWVzIHsKICAgIGNvbXBpbGUgcHJvamVjdCgnOmxpYnJhcmllczpob2xvZXZlcnl3aGVyZScpCiAgICBjb21waWxlIHByb2plY3QoJzpsaWJyYXJpZXM6aG9sb2V2ZXJ5d2hlcmUtcHJlZmVyZW5jZXMnKQogICAgY29tcGlsZSBmaWxlVHJlZShpbmNsdWRlOiBbJyouamFyJ10sIGRpcjogJ3NyYy9tYWluL2xpYnMnKQogICAgd2l0aGdwbGF5Q29tcGlsZSBmaWxlVHJlZShkaXI6ICdzcmMvd2l0aGdwbGF5L2xpYnMnLCBpbmNsdWRlOiBbJyouamFyJ10pCiAgICB3aXRoemVlbW90ZUNvbXBpbGUgZmlsZVRyZWUoZGlyOiAnc3JjL3dpdGh6ZWVtb3RlL2xpYnMnLCBpbmNsdWRlOiBbJyouamFyJ10pCn0K" | base64 -d > build.gradle
 
-          # Update Gradle wrapper to 4.4
+          # Update Gradle wrapper to 4.4 (compatible with AGP 2.3.3)
           sed -i 's|distributionUrl=.*|distributionUrl=https\\://services.gradle.org/distributions/gradle-4.4-all.zip|' \
             gradle/wrapper/gradle-wrapper.properties
 
@@ -58,6 +58,9 @@ jobs:
               grep -q 'google()' "$f" || sed -i '/mavenCentral()/i\\        google()' "$f"
             fi
           done
+
+          echo "=== Patched build.gradle ===" && cat build.gradle
+          echo "=== Gradle wrapper ===" && cat gradle/wrapper/gradle-wrapper.properties
 
       - name: Make gradlew executable
         run: chmod +x ./gradlew
@@ -71,9 +74,11 @@ jobs:
           ANDROID_NDK_HOME: ${{ env.ANDROID_NDK_HOME }}
 
       - name: Find APK
-        run: find build/outputs/apk -name "*.apk" -type f
+        if: always()
+        run: find . -name "*.apk" -type f 2>/dev/null || echo "No APK found"
 
       - name: Upload APK
+        if: success()
         uses: actions/upload-artifact@v4
         with:
           name: GloomyDungeons2-debug
