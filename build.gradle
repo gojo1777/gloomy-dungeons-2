@@ -1,19 +1,15 @@
 // org.zamedev.gloomydungeons2.fullnfree
 
-buildscript {
-    repositories {
-        mavenCentral()
-        jcenter()
-    }
-
-    dependencies {
-        classpath 'com.android.tools.build:gradle:2.2.3'
-    }
+plugins {
+    id "com.android.application"
 }
 
-apply plugin: 'android'
-
 allprojects {
+    repositories {
+        google()
+        mavenCentral()
+    }
+
     tasks.withType(JavaCompile) {
         options.compilerArgs << '-Xlint:all'
         options.compilerArgs << '-Xlint:-deprecation'
@@ -22,44 +18,31 @@ allprojects {
 }
 
 android {
-    compileSdkVersion 22
-    buildToolsVersion '25.0.2'
-    // useLibrary 'org.apache.http.legacy'
+    namespace 'zame.game'
+    compileSdk 34
+    ndkVersion '25.2.9519653'
 
     defaultConfig {
-        minSdkVersion Integer.parseInt(project.ANDROID_BUILD_MIN_SDK_VERSION)
-        targetSdkVersion Integer.parseInt(project.ANDROID_BUILD_TARGET_SDK_VERSION)
+        minSdk Integer.parseInt(project.ANDROID_BUILD_MIN_SDK_VERSION)
+        targetSdk Integer.parseInt(project.ANDROID_BUILD_TARGET_SDK_VERSION)
 
         versionName project.VERSION_NAME
         versionCode Integer.parseInt(project.VERSION_CODE)
 
-        ndk {
-            moduleName 'librenderer'
-            cFlags '-Werror'
-            ldLibs 'log', 'GLESv1_CM'
-            // abiFilters 'armeabi-v7a', 'armeabi', 'x86'
-        }
-    }
-
-    if (new File('tools/signing.properties').exists()) {
-        Properties props = new Properties()
-        props.load(new FileInputStream(file('tools/signing.properties')))
-
-        signingConfigs {
-            release {
-                storeFile file('tools/signing.keystore')
-                keyAlias props['keyAlias']
-                storePassword props['storePassword']
-                keyPassword props['keyPassword']
-            }
-        }
-
-        buildTypes {
-            release {
-                signingConfig signingConfigs.release
+        externalNativeBuild {
+            ndkBuild {
+                cFlags '-Werror'
             }
         }
     }
+
+    externalNativeBuild {
+        ndkBuild {
+            path 'src/main/jni/Android.mk'
+        }
+    }
+
+    useLibrary 'org.apache.http.legacy'
 
     buildTypes {
         release {
@@ -68,7 +51,7 @@ android {
         }
     }
 
-    flavorDimensions 'package', 'gplay', 'zeemote', 'langko', 'gfxhalloween'
+    flavorDimensions = ['package', 'gplay', 'zeemote', 'langko', 'gfxhalloween']
 
     productFlavors {
         forgplay {
@@ -118,12 +101,24 @@ android {
             dimension 'gfxhalloween'
         }
     }
+
+    // Only build the clean F-Droid/open-source variant (no Google Play, no
+    // Zeemote controller support, no Korean assets, no Halloween skin).
+    // This avoids building 32 flavor combinations on every CI run.
+    variantFilter { variant ->
+        def names = variant.flavors*.name
+        if (!(names.contains('forfdroid') &&
+              names.contains('woutgplay') &&
+              names.contains('woutzeemote') &&
+              names.contains('woutko') &&
+              names.contains('wouthalloween'))) {
+            variant.setIgnore(true)
+        }
+    }
 }
 
 dependencies {
-    compile project(':libraries:holoeverywhere')
-    compile project(':libraries:holoeverywhere-preferences')
-    compile fileTree(include: ['*.jar'], dir: 'src/main/libs')
-    withgplayCompile fileTree(dir: 'src/withgplay/libs', include: ['*.jar'])
-    withzeemoteCompile fileTree(dir: 'src/withzeemote/libs', include: ['*.jar'])
+    implementation project(':libraries:holoeverywhere')
+    implementation project(':libraries:holoeverywhere-preferences')
+    implementation fileTree(include: ['*.jar'], dir: 'src/main/libs')
 }
